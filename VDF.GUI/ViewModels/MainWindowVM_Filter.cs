@@ -135,13 +135,20 @@ namespace VDF.GUI.ViewModels {
 		}
 
 		/// <summary>
-		/// Substring match by default; when the needle contains * or ? it is treated
-		/// as a wildcard pattern instead (unanchored, so "season?\ep*" works without
-		/// the user having to wrap it in stars themselves).
+		/// Plain text: every word of the needle must appear somewhere in the path, in any
+		/// order ("holiday 2023" finds "D:\2023\Holiday\a.mp4"). When the needle contains
+		/// * or ? it is treated as a wildcard pattern instead (unanchored, so
+		/// "season?\ep*" works without the user having to wrap it in stars themselves).
 		/// </summary>
 		internal static bool PathMatchesFilter(string path, string needle) {
-			if (needle.IndexOfAny(['*', '?']) < 0)
-				return path.Contains(needle, StringComparison.OrdinalIgnoreCase);
+			if (needle.IndexOfAny(['*', '?']) < 0) {
+				var words = needle.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+				foreach (var word in words) {
+					if (!path.Contains(word, StringComparison.OrdinalIgnoreCase))
+						return false;
+				}
+				return true;
+			}
 			string pattern = EscapeWildcardBackslashes(needle);
 			if (!pattern.StartsWith('*')) pattern = "*" + pattern;
 			if (!pattern.EndsWith('*')) pattern += "*";

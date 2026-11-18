@@ -124,9 +124,24 @@ namespace VDF.GUI.ViewModels {
 			items.Where(d => d.ItemInfo.IsAiMatched).Select(d => d.ItemInfo.GroupId).ToHashSet();
 
 		HashSet<Guid> _groupsWithPathHit = new();
+		/// <summary>
+		/// Set while the search box holds name:/path:/size/total terms or quotes (see
+		/// <see cref="ResultsSearchQuery"/>); null means the classic path search is used.
+		/// </summary>
+		ResultsSearchQuery? _searchQuery;
 		void RebuildSearchPathIndex() {
 			var needle = FilterByPath;
-			if (string.IsNullOrEmpty(needle)) { _groupsWithPathHit.Clear(); return; }
+			if (string.IsNullOrEmpty(needle)) { _searchQuery = null; _groupsWithPathHit.Clear(); return; }
+
+			_searchQuery = ResultsSearchQuery.Parse(needle);
+			if (_searchQuery != null) {
+				_groupsWithPathHit = _searchQuery.MatchingGroups(
+					Duplicates,
+					d => d.ItemInfo.GroupId,
+					d => d.ItemInfo.Path,
+					d => d.ItemInfo.SizeLong);
+				return;
+			}
 
 			_groupsWithPathHit = Duplicates
 				.Where(d => PathMatchesFilter(d.ItemInfo.Path, needle))
@@ -195,8 +210,10 @@ namespace VDF.GUI.ViewModels {
 		internal bool DuplicatesFilterCore(DuplicateItemVM data) {
 			bool ok = true;
 			if (!string.IsNullOrEmpty(FilterByPath)) {
-				ok = PathMatchesFilter(data.ItemInfo.Path, FilterByPath)
-					 || _groupsWithPathHit.Contains(data.ItemInfo.GroupId);
+				ok = _searchQuery != null
+					? _groupsWithPathHit.Contains(data.ItemInfo.GroupId)
+					: PathMatchesFilter(data.ItemInfo.Path, FilterByPath)
+					  || _groupsWithPathHit.Contains(data.ItemInfo.GroupId);
 			}
 
 			if (ok && FileType.Value != FileTypeFilter.All)

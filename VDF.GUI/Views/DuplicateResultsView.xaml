@@ -473,6 +473,9 @@
         <Button Margin="6,0,0,0" FontSize="12" Padding="10,3" CornerRadius="12"
                 Command="{Binding ApplyFiltersCommand}" Content="Apply"
                 ToolTip.Tip="Apply the search and the filters now (or press Enter in the search box). They also apply by themselves after a short pause in typing." />
+        <TextBlock Margin="10,0,0,0" FontSize="12" Opacity="0.85" VerticalAlignment="Center"
+                   IsVisible="{Binding IsFilterResultsVisible}"
+                   Text="{Binding FilterResultsText}" />
         <ToggleButton
             Classes="chip"
             Margin="10,0,0,0"

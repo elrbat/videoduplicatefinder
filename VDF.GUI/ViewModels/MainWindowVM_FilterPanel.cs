@@ -33,10 +33,32 @@ namespace VDF.GUI.ViewModels {
 		/// <summary>How many filter rows of the panel currently have a usable value.</summary>
 		public int ActiveFilterCount => _activeFilterCount;
 
-		public string FiltersButtonText => _activeFilterCount > 0 ? "فلاتر (" + _activeFilterCount + ")" : "فلاتر";
+		public string FiltersButtonText => _activeFilterCount > 0 ? "Filters (" + _activeFilterCount + ")" : "Filters";
+
+		/// <summary>Results refresh this long after the last keystroke (or at once with Apply / Enter).</summary>
+		const int FilterApplyDelayMs = 1500;
+
+		/// <summary>What is typed in the search box. It only reaches <see cref="FilterByPath"/> (the applied search) on apply.</summary>
+		string _filterSearchText = string.Empty;
+		public string FilterSearchText {
+			get => _filterSearchText;
+			set {
+				value ??= string.Empty;
+				if (_filterSearchText == value) return;
+				_filterSearchText = value;
+				this.RaisePropertyChanged(nameof(FilterSearchText));
+				ScheduleFilterApply();
+			}
+		}
+
+		/// <summary>Applies the search box and the filter panel right now.</summary>
+		public ReactiveCommand<Unit, Unit> ApplyFiltersCommand => ReactiveCommand.Create(() => {
+			ApplyFiltersNow(true);
+		});
 
 		public ReactiveCommand<Unit, Unit> ResetFiltersCommand => ReactiveCommand.Create(() => {
 			ResetFilterPanel();
+			ApplyFiltersNow(true);
 		});
 
 		void ResetFilterPanel() {
@@ -134,7 +156,7 @@ namespace VDF.GUI.ViewModels {
 			OnFilterPanelChanged();
 		}
 
-		/// <summary>Updates the active-filter counter at once and refreshes the results after a short pause in typing.</summary>
+		/// <summary>Updates the active-filter counter at once; the results follow after a pause in typing.</summary>
 		void OnFilterPanelChanged() {
 			BuildPanelQueryText(out int rows);
 			if (rows != _activeFilterCount) {
@@ -142,18 +164,46 @@ namespace VDF.GUI.ViewModels {
 				this.RaisePropertyChanged(nameof(ActiveFilterCount));
 				this.RaisePropertyChanged(nameof(FiltersButtonText));
 			}
+			ScheduleFilterApply();
+		}
 
+		/// <summary>(Re)starts the pause timer. Every further keystroke postpones the refresh.</summary>
+		void ScheduleFilterApply() {
 			if (_filterPanelTimer == null) {
-				var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+				var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(FilterApplyDelayMs) };
 				timer.Tick += (_, __) => {
 					timer.Stop();
-					RebuildSearchPathIndex();
-					RefreshResultsView();
+					ApplyFiltersNow(false);
 				};
 				_filterPanelTimer = timer;
 			}
 			_filterPanelTimer.Stop();
 			_filterPanelTimer.Start();
+		}
+
+		string _lastAppliedFilterKey = "\n";
+
+		/// <summary>
+		/// Makes the search box and the panel take effect. When it comes from the pause timer
+		/// (<paramref name="force"/> false) a lone first character is not applied yet - a full
+		/// scan for one letter is slow and rarely what is wanted - and nothing happens at all
+		/// when the typing ended up exactly where the last apply was.
+		/// </summary>
+		void ApplyFiltersNow(bool force) {
+			_filterPanelTimer?.Stop();
+
+			string text = _filterSearchText;
+			bool applySearch = force || text != FilterByPath;
+			if (!force && applySearch && text.Trim().Length == 1) applySearch = false;
+
+			string searchToUse = applySearch ? text : FilterByPath;
+			string key = searchToUse + "\n" + BuildPanelQueryText(out _);
+			if (!force && key == _lastAppliedFilterKey) return;
+			_lastAppliedFilterKey = key;
+
+			if (applySearch) FilterByPath = text;
+			RebuildSearchPathIndex();
+			RefreshResultsView();
 		}
 
 		/// <summary>

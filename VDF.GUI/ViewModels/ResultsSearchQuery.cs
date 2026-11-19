@@ -27,7 +27,8 @@ namespace VDF.GUI.ViewModels {
 	/// "field operator value" terms next to plain words. Terms are separated by spaces; wrap a
 	/// value in double quotes to keep spaces in it.
 	///
-	///   name:text     file name (without folders) contains text
+	///   name:text     file name (without folders) contains text; several words ("first second")
+	///                 must all appear, in any order
 	///   name=text     file name is exactly text (with or without the extension)
 	///   name!=text    no file of the group is named exactly text
 	///   name!:text    no file of the group has a name containing text
@@ -65,6 +66,8 @@ namespace VDF.GUI.ViewModels {
 			public Field Field;
 			public Op Op;
 			public string Text = string.Empty;
+			/// <summary>name:/path: contains-terms with several words: all of them must appear, in any order.</summary>
+			public string[]? Words;
 			public double Number;
 			public string[] Extensions = Array.Empty<string>();
 		}
@@ -179,6 +182,10 @@ namespace VDF.GUI.ViewModels {
 				case Field.Path:
 				case Field.Name:
 					t.Text = value;
+					if ((t.Op is Op.Contains or Op.NotContains) && value.IndexOfAny(new[] { '*', '?' }) < 0) {
+						string[] words = value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+						if (words.Length > 1) t.Words = words;
+					}
 					break;
 				case Field.Ext:
 					t.Extensions = value.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
@@ -435,9 +442,9 @@ namespace VDF.GUI.ViewModels {
 			bool exact = t.Op is Op.Exact or Op.NotExact;
 			switch (t.Field) {
 				case Field.Path:
-					return TextMatches(path, t.Text, exact);
+					return TermTextMatches(path, t, exact);
 				case Field.Name:
-					return TextMatches(fileName, t.Text, exact) || (exact && TextMatches(nameNoExt, t.Text, true));
+					return TermTextMatches(fileName, t, exact) || (exact && TextMatches(nameNoExt, t.Text, true));
 				case Field.Ext: {
 					int dot = fileName.LastIndexOf('.');
 					string ext = dot >= 0 ? fileName.Substring(dot + 1) : string.Empty;
@@ -464,6 +471,16 @@ namespace VDF.GUI.ViewModels {
 				case Op.LessOrEqual: return value <= t.Number;
 				default: return Math.Abs(value - t.Number) < 1e-6;
 			}
+		}
+
+		/// <summary>A multi-word contains-term needs every word, in any order; everything else is a single text match.</summary>
+		static bool TermTextMatches(string value, Term t, bool exact) {
+			if (!exact && t.Words != null) {
+				foreach (string word in t.Words)
+					if (!value.Contains(word, StringComparison.OrdinalIgnoreCase)) return false;
+				return true;
+			}
+			return TextMatches(value, t.Text, exact);
 		}
 
 		/// <summary>

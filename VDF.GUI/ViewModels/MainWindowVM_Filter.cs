@@ -125,21 +125,22 @@ namespace VDF.GUI.ViewModels {
 
 		HashSet<Guid> _groupsWithPathHit = new();
 		/// <summary>
-		/// Set while the search box holds name:/path:/size/total terms or quotes (see
-		/// <see cref="ResultsSearchQuery"/>); null means the classic path search is used.
+		/// Set while the search box holds name:/path:/size/... terms or quotes, or while any box of
+		/// the filter panel is filled (see <see cref="ResultsSearchQuery"/>); null means the classic
+		/// path search is used.
 		/// </summary>
 		ResultsSearchQuery? _searchQuery;
 		void RebuildSearchPathIndex() {
 			var needle = FilterByPath;
-			if (string.IsNullOrEmpty(needle)) { _searchQuery = null; _groupsWithPathHit.Clear(); return; }
+			string panel = BuildPanelQueryText(out _);
+			if (string.IsNullOrEmpty(needle) && panel.Length == 0) { _searchQuery = null; _groupsWithPathHit.Clear(); return; }
 
-			_searchQuery = ResultsSearchQuery.Parse(needle);
+			_searchQuery = ResultsSearchQuery.Parse(panel.Length == 0 ? needle : needle + " " + panel);
 			if (_searchQuery != null) {
 				_groupsWithPathHit = _searchQuery.MatchingGroups(
 					Duplicates,
 					d => d.ItemInfo.GroupId,
-					d => d.ItemInfo.Path,
-					d => d.ItemInfo.SizeLong);
+					d => ToFileRecord(d));
 				return;
 			}
 
@@ -209,11 +210,12 @@ namespace VDF.GUI.ViewModels {
 		/// <summary>The results filter; the view exposes it as always-active toolbar chips.</summary>
 		internal bool DuplicatesFilterCore(DuplicateItemVM data) {
 			bool ok = true;
-			if (!string.IsNullOrEmpty(FilterByPath)) {
-				ok = _searchQuery != null
-					? _groupsWithPathHit.Contains(data.ItemInfo.GroupId)
-					: PathMatchesFilter(data.ItemInfo.Path, FilterByPath)
-					  || _groupsWithPathHit.Contains(data.ItemInfo.GroupId);
+			if (_searchQuery != null) {
+				ok = _groupsWithPathHit.Contains(data.ItemInfo.GroupId);
+			}
+			else if (!string.IsNullOrEmpty(FilterByPath)) {
+				ok = PathMatchesFilter(data.ItemInfo.Path, FilterByPath)
+					 || _groupsWithPathHit.Contains(data.ItemInfo.GroupId);
 			}
 
 			if (ok && FileType.Value != FileTypeFilter.All)

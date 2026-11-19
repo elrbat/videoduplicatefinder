@@ -1496,13 +1496,21 @@ namespace VDF.GUI.ViewModels {
 				newName = FileUtils.SafePathCombine(fi.DirectoryName!, newName + fi.Extension);
 			}
 			try {
-				ScanEngine.GetFromDatabase(currentItem.ItemInfo.Path, out var dbEntry);
+				string oldPath = currentItem.ItemInfo.Path;
+				bool inDatabase = ScanEngine.GetFromDatabase(oldPath, out var dbEntry);
 				fi.MoveTo(newName, true);
-				ScanEngine.UpdateFilePathInDatabase(newName, dbEntry!);
+				// From here on the file is renamed on disk, so the list entry has to follow even when
+				// the database has no entry for it. Before, the missing entry threw a NullReference
+				// right after the move and the item kept pointing at the old name.
 				currentItem.ItemInfo.Path = newName;
+				if (inDatabase && dbEntry != null)
+					ScanEngine.UpdateFilePathInDatabase(newName, dbEntry);
+				else
+					Logger.Instance.Warn($"Renamed '{oldPath}' to '{newName}' but the file had no entry in the database.");
 				ScanEngine.SaveDatabase();
 			}
 			catch (Exception e) {
+				Logger.Instance.Error($"Rename failed: {e}");
 				await MessageBoxService.Show(e.Message);
 			}
 		});

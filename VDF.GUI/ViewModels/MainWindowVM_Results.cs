@@ -161,6 +161,7 @@ namespace VDF.GUI.ViewModels {
 			ResultsRows.Clear();
 			ResultsRows.AddRange(result.Rows);
 			this.RaisePropertyChanged(nameof(ResultsShowClipOffsetColumn));
+			UpdateFilterResultsText();
 			// The rebuild replaced every row object while the ScrollViewer kept its pixel
 			// offset — without restoring the anchor, deleting groups dumps the user at a
 			// random position in the list. The anchor row returns to its captured viewport

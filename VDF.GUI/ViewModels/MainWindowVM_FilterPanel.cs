@@ -18,6 +18,7 @@ using System.Reactive;
 using System.Text;
 using Avalonia.Threading;
 using ReactiveUI;
+using VDF.GUI.Data;
 
 namespace VDF.GUI.ViewModels {
 	/// <summary>
@@ -74,6 +75,36 @@ namespace VDF.GUI.ViewModels {
 			FilterCreatedFrom = string.Empty; FilterCreatedTo = string.Empty;
 			FilterModifiedFrom = string.Empty; FilterModifiedTo = string.Empty;
 			FilterCountMin = string.Empty; FilterCountMax = string.Empty;
+		}
+
+		// ---------------------------------------------------------------- results label
+		string _filterResultsText = string.Empty;
+
+		/// <summary>"Showing 24 of 1,230 files in 11 of 540 groups" while any filter is active, otherwise empty.</summary>
+		public string FilterResultsText => _filterResultsText;
+		public bool IsFilterResultsVisible => _filterResultsText.Length > 0;
+
+		bool IsAnyResultsFilterActive() =>
+			_searchQuery != null || !string.IsNullOrEmpty(FilterByPath)
+			|| (FileType != null && FileType.Value != FileTypeFilter.All)
+			|| FilterSimilarityFrom > 0 || FilterSimilarityTo < 100
+			|| FilterGroupsWithCheckedItems || FilterHideGroupsWithOneFileLeft || FilterOnlyGroupsWithAiMatches;
+
+		/// <summary>Called at the end of every results rebuild, so the label also follows deletes and imports.</summary>
+		internal void UpdateFilterResultsText() {
+			string text = string.Empty;
+			if (Duplicates.Count > 0 && IsAnyResultsFilterActive()) {
+				int shownFiles = 0;
+				foreach (var group in resultsGroups) shownFiles += group.FileCount;
+				var allGroups = new HashSet<Guid>();
+				foreach (var d in Duplicates) allGroups.Add(d.ItemInfo.GroupId);
+				text = "Showing " + shownFiles.ToString("N0") + " of " + Duplicates.Count.ToString("N0") + " files in "
+					+ resultsGroups.Count.ToString("N0") + " of " + allGroups.Count.ToString("N0") + " groups";
+			}
+			if (text == _filterResultsText) return;
+			_filterResultsText = text;
+			this.RaisePropertyChanged(nameof(FilterResultsText));
+			this.RaisePropertyChanged(nameof(IsFilterResultsVisible));
 		}
 
 		// ---------------------------------------------------------------- text filters

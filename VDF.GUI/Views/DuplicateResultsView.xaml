@@ -374,7 +374,7 @@
         </Button>
         <Border Width="1" Height="20" Margin="10,0" Background="{actipro:ThemeResource Container3BorderBrush}" />
         <Button x:Name="FiltersButton" Margin="0,0,10,0" FontSize="12" Padding="10,3" CornerRadius="12"
-                ToolTip.Tip="فلاتر متقدمة. كل الفلاتر بتتجمع مع بعض، والخانة الفاضية = الفلتر غير مفعّل">
+                ToolTip.Tip="Advanced filters. All active filters are combined; an empty box means that filter is off.">
           <Button.Content>
             <StackPanel Orientation="Horizontal" Spacing="5">
               <TextBlock Text="{Binding FiltersButtonText}" />
@@ -383,76 +383,79 @@
           </Button.Content>
           <Button.Flyout>
             <Flyout>
-              <ScrollViewer Width="620" MaxHeight="560" HorizontalScrollBarVisibility="Disabled">
+              <ScrollViewer Width="640" MaxHeight="560" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="6" Margin="2,2,12,2">
-          <TextBlock FontSize="11" Opacity="0.7" TextWrapping="Wrap" Text="كل الفلاتر بتتجمع مع بعض. أي خانة فاضية = الفلتر غير مفعّل." />
-          <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="الاسم والمسار" />
-          <Grid ColumnDefinitions="150,Auto,Auto,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="اسم الملف" ToolTip.Tip="اسم الملف بدون المسار. يدعم * و ?" />
-            <ToggleButton Grid.Column="1" Classes="chip" Margin="0,0,4,0" IsChecked="{Binding FilterNameExact}" Content="تمامًا" ToolTip.Tip="مفعّلة: يساوي النص بالظبط. غير مفعّلة: يحتوي على النص" />
-            <ToggleButton Grid.Column="2" Classes="chip" Margin="0,0,6,0" IsChecked="{Binding FilterNameExclude}" Content="استبعاد" ToolTip.Tip="مفعّلة: استبعد أي مجموعة فيها ملف مطابق" />
-            <TextBox Grid.Column="3" FontSize="12" Text="{Binding FilterNameText}" PlaceholderText="اسم الملف يحتوي على... (يدعم * و ?)" />
-          </Grid>
-          <Grid ColumnDefinitions="150,Auto,Auto,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="المسار" ToolTip.Tip="المسار الكامل للملف بالفولدرات. يدعم * و ?" />
-            <ToggleButton Grid.Column="1" Classes="chip" Margin="0,0,4,0" IsChecked="{Binding FilterPathExact}" Content="تمامًا" ToolTip.Tip="مفعّلة: يساوي النص بالظبط. غير مفعّلة: يحتوي على النص" />
-            <ToggleButton Grid.Column="2" Classes="chip" Margin="0,0,6,0" IsChecked="{Binding FilterPathExclude}" Content="استبعاد" ToolTip.Tip="مفعّلة: استبعد أي مجموعة فيها ملف مطابق" />
-            <TextBox Grid.Column="3" FontSize="12" Text="{Binding FilterPathText}" PlaceholderText="المسار الكامل يحتوي على... (يدعم * و ?)" />
-          </Grid>
-          <Grid ColumnDefinitions="150,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="الامتداد" ToolTip.Tip="امتداد الملف. اكتب أكتر من واحد بفاصلة" />
-            <TextBox Grid.Column="1" FontSize="12" Text="{Binding FilterExtensions}" PlaceholderText="الامتداد، مثال: mkv, mp4" />
-          </Grid>
-          <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="الأحجام" />
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="حجم الملف" ToolTip.Tip="يطبّق على ملف واحد داخل المجموعة. الوحدات: KB MB GB TB" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterSizeMin}" PlaceholderText="حجم الملف من... مثال: 500MB" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterSizeMax}" PlaceholderText="حجم الملف إلى... مثال: 2GB" />
-          </Grid>
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="مجموع حجم المجموعة" ToolTip.Tip="مجموع أحجام كل ملفات المجموعة" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterTotalMin}" PlaceholderText="مجموع المجموعة من... مثال: 10GB" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterTotalMax}" PlaceholderText="مجموع المجموعة إلى... مثال: 50GB" />
-          </Grid>
-          <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="الفيديو" />
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="المدة" ToolTip.Tip="رقم بس = دقايق. أو: 1h30m أو 45m أو 30s أو 1:30:00" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterDurationMin}" PlaceholderText="المدة من... مثال: 90 أو 1h30m" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterDurationMax}" PlaceholderText="المدة إلى... مثال: 2h" />
-          </Grid>
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="الدقة" ToolTip.Tip="تقاس بالضلع الأقصر: 1080 أو 1080p أو 1920x1080 أو 4k" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterResolutionMin}" PlaceholderText="الدقة من... مثال: 1080 أو 4k" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterResolutionMax}" PlaceholderText="الدقة إلى... مثال: 2160" />
-          </Grid>
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="البت ريت" ToolTip.Tip="رقم بس = kbps. أو: 5mbps" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterBitrateMin}" PlaceholderText="البت ريت من... مثال: 5000 أو 5mbps" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterBitrateMax}" PlaceholderText="البت ريت إلى... مثال: 20mbps" />
-          </Grid>
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="FPS" ToolTip.Tip="عدد الإطارات في الثانية" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterFpsMin}" PlaceholderText="FPS من... مثال: 24" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterFpsMax}" PlaceholderText="FPS إلى... مثال: 60" />
-          </Grid>
-          <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="التواريخ" />
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="تاريخ الإنشاء" ToolTip.Tip="الصيغة: 2024-01-31 أو 31/01/2024" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterCreatedFrom}" PlaceholderText="أنشئ من تاريخ... مثال: 2024-01-31" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterCreatedTo}" PlaceholderText="أنشئ حتى تاريخ... مثال: 2025-12-31" />
-          </Grid>
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="تاريخ التعديل" ToolTip.Tip="الصيغة: 2024-01-31 أو 31/01/2024" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterModifiedFrom}" PlaceholderText="عُدّل من تاريخ... مثال: 2024-01-31" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterModifiedTo}" PlaceholderText="عُدّل حتى تاريخ... مثال: 2025-12-31" />
-          </Grid>
-          <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="المجموعة" />
-          <Grid ColumnDefinitions="150,*,*">
-            <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="عدد الملفات" ToolTip.Tip="عدد الملفات داخل المجموعة الواحدة" />
-            <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterCountMin}" PlaceholderText="عدد ملفات المجموعة من... مثال: 2" />
-            <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterCountMax}" PlaceholderText="عدد ملفات المجموعة إلى... مثال: 5" />
-          </Grid>
-          <Button Margin="0,8,0,0" HorizontalAlignment="Left" FontSize="12" Padding="10,3" CornerRadius="12" Command="{Binding ResetFiltersCommand}" Content="مسح كل الفلاتر" />
+                  <TextBlock FontSize="11" Opacity="0.7" TextWrapping="Wrap" Text="All filters are combined. An empty box means that filter is off. Results update after a short pause in typing, or press Apply." />
+                  <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="NAME &amp; PATH" />
+                  <Grid ColumnDefinitions="150,Auto,Auto,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="File name" ToolTip.Tip="File name without the folders. Several words must all appear, in any order. * and ? are wildcards." />
+                    <ToggleButton Grid.Column="1" Classes="chip" Margin="0,0,4,0" IsChecked="{Binding FilterNameExact}" Content="Exact" ToolTip.Tip="On: equals the text exactly. Off: contains all the words, in any order." />
+                    <ToggleButton Grid.Column="2" Classes="chip" Margin="0,0,6,0" IsChecked="{Binding FilterNameExclude}" Content="Exclude" ToolTip.Tip="On: hide every group that has a matching file." />
+                    <TextBox Grid.Column="3" FontSize="12" Text="{Binding FilterNameText}" PlaceholderText="File name contains these words, any order (* and ? allowed)" />
+                  </Grid>
+                  <Grid ColumnDefinitions="150,Auto,Auto,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Path" ToolTip.Tip="Full path including the folders. Several words must all appear, in any order. * and ? are wildcards." />
+                    <ToggleButton Grid.Column="1" Classes="chip" Margin="0,0,4,0" IsChecked="{Binding FilterPathExact}" Content="Exact" ToolTip.Tip="On: equals the text exactly. Off: contains all the words, in any order." />
+                    <ToggleButton Grid.Column="2" Classes="chip" Margin="0,0,6,0" IsChecked="{Binding FilterPathExclude}" Content="Exclude" ToolTip.Tip="On: hide every group that has a matching file." />
+                    <TextBox Grid.Column="3" FontSize="12" Text="{Binding FilterPathText}" PlaceholderText="Full path contains these words, any order (* and ? allowed)" />
+                  </Grid>
+                  <Grid ColumnDefinitions="150,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Extension" ToolTip.Tip="File extension. Separate several with a comma." />
+                    <TextBox Grid.Column="1" FontSize="12" Text="{Binding FilterExtensions}" PlaceholderText="Extension(s), e.g. mkv, mp4" />
+                  </Grid>
+                  <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="SIZES" />
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="File size" ToolTip.Tip="Applies to a single file inside the group. Units: KB, MB, GB, TB (no unit = MB)." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterSizeMin}" PlaceholderText="File size from, e.g. 500MB" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterSizeMax}" PlaceholderText="File size to, e.g. 2GB" />
+                  </Grid>
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Group total size" ToolTip.Tip="The sum of the sizes of all files in the group." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterTotalMin}" PlaceholderText="Group total from, e.g. 10GB" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterTotalMax}" PlaceholderText="Group total to, e.g. 50GB" />
+                  </Grid>
+                  <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="VIDEO" />
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Duration" ToolTip.Tip="A plain number means minutes. Also: 1h30m, 45m, 30s, 1:30:00." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterDurationMin}" PlaceholderText="Duration from, e.g. 90 or 1h30m" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterDurationMax}" PlaceholderText="Duration to, e.g. 2h" />
+                  </Grid>
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Resolution" ToolTip.Tip="Measured on the shorter side: 1080, 1080p, 1920x1080, 4k." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterResolutionMin}" PlaceholderText="Resolution from, e.g. 1080 or 4k" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterResolutionMax}" PlaceholderText="Resolution to, e.g. 2160" />
+                  </Grid>
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Bitrate" ToolTip.Tip="A plain number means kbps. Also: 5mbps." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterBitrateMin}" PlaceholderText="Bitrate from, e.g. 5000 or 5mbps" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterBitrateMax}" PlaceholderText="Bitrate to, e.g. 20mbps" />
+                  </Grid>
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="FPS" ToolTip.Tip="Frames per second." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterFpsMin}" PlaceholderText="FPS from, e.g. 24" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterFpsMax}" PlaceholderText="FPS to, e.g. 60" />
+                  </Grid>
+                  <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="DATES" />
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Date created" ToolTip.Tip="Formats: 2024-01-31 or 31/01/2024. A date without a time covers the whole day." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterCreatedFrom}" PlaceholderText="Created from, e.g. 2024-01-31" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterCreatedTo}" PlaceholderText="Created until, e.g. 2025-12-31" />
+                  </Grid>
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Date modified" ToolTip.Tip="Formats: 2024-01-31 or 31/01/2024. A date without a time covers the whole day." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterModifiedFrom}" PlaceholderText="Modified from, e.g. 2024-01-31" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterModifiedTo}" PlaceholderText="Modified until, e.g. 2025-12-31" />
+                  </Grid>
+                  <TextBlock Margin="0,6,0,0" FontSize="11" FontWeight="SemiBold" Opacity="0.6" Text="GROUP" />
+                  <Grid ColumnDefinitions="150,*,*">
+                    <TextBlock Grid.Column="0" FontSize="12" VerticalAlignment="Center" Text="Files in group" ToolTip.Tip="Number of files inside one group." />
+                    <TextBox Grid.Column="1" Margin="0,0,6,0" FontSize="12" Text="{Binding FilterCountMin}" PlaceholderText="Files in group from, e.g. 2" />
+                    <TextBox Grid.Column="2" FontSize="12" Text="{Binding FilterCountMax}" PlaceholderText="Files in group up to, e.g. 5" />
+                  </Grid>
+                  <StackPanel Margin="0,8,0,0" Orientation="Horizontal" Spacing="8">
+                    <Button FontSize="12" Padding="12,3" CornerRadius="12" Command="{Binding ApplyFiltersCommand}" Content="Apply" />
+                    <Button FontSize="12" Padding="12,3" CornerRadius="12" Command="{Binding ResetFiltersCommand}" Content="Reset filters" />
+                  </StackPanel>
                 </StackPanel>
               </ScrollViewer>
             </Flyout>
@@ -460,9 +463,16 @@
         </Button>
         <TextBox
             MinWidth="170" FontSize="12"
-            Text="{Binding FilterByPath}"
+            Text="{Binding FilterSearchText}"
             PlaceholderText="{Binding Source={x:Static local:App.Lang}, Path=[MainWindow.Filter.Path]}"
-            ToolTip.Tip="{Binding Source={x:Static local:App.Lang}, Path=[MainWindow.Filter.PathNote]}" />
+            ToolTip.Tip="{Binding Source={x:Static local:App.Lang}, Path=[MainWindow.Filter.PathNote]}">
+          <TextBox.KeyBindings>
+            <KeyBinding Gesture="Enter" Command="{Binding ApplyFiltersCommand}" />
+          </TextBox.KeyBindings>
+        </TextBox>
+        <Button Margin="6,0,0,0" FontSize="12" Padding="10,3" CornerRadius="12"
+                Command="{Binding ApplyFiltersCommand}" Content="Apply"
+                ToolTip.Tip="Apply the search and the filters now (or press Enter in the search box). They also apply by themselves after a short pause in typing." />
         <ToggleButton
             Classes="chip"
             Margin="10,0,0,0"
